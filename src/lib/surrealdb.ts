@@ -1,35 +1,52 @@
-import { Surreal } from "surrealdb.js";
+// surrealdb.ts
+import { Surreal, RecordId, Table } from "surrealdb";
 
-const connectionString = process.env.NEXT_PUBLIC_SURREALDB_URL as string;
-const user = process.env.NEXT_PUBLIC_SURREALDB_USER as string;
-const pass = process.env.NEXT_PUBLIC_SURREALDB_PASSWORD as string;
-const ns = process.env.NEXT_PUBLIC_SURREALDB_NAMESPACE as string;
-const db = process.env.NEXT_PUBLIC_SURREALDB_DATABASE as string;
+// Create a new instance of SurrealDB
+const db = new Surreal();
 
-export const surrealDatabase = new Surreal();
-
-export const surrealConnection = async (): Promise<Surreal> => {
+export async function connectToDatabase() {
     try {
-        if (!connectionString) {
-            throw new Error("Connection string is undefined or invalid.");
-        }
-        await surrealDatabase.connect(connectionString);
-        console.log("got this far");
-        
-        if (!user || !pass || !ns || !db) {
-            throw new Error("Authentication details are missing.");
-        }
+        // Connect to the database
+        await db.connect("http://127.0.0.1:8000/rpc");
 
-        await surrealDatabase.signin({
-            username: user,
-            password: pass,
-            namespace: ns,
-            database: db,
+        // Select a specific namespace / database
+        await db.use({
+            namespace: "test",
+            database: "test"
         });
-        console.log("authenticated");
-        return surrealDatabase;
-    } catch (e) {
-        console.error("Failed to connect to SurrealDB:", e);
-        throw e;
+
+        // Sign in with credentials
+        await db.signin({
+            username: "root",
+            password: "root",
+        });
+
+        console.log("Connected to SurrealDB");
+
+        return db; // Return the db instance for further use
+    } catch (err) {
+        console.error("Failed to connect:", err);
+        throw err;
     }
-};
+}
+
+export async function createPerson(db: Surreal) {
+    const created = await db.create("person", {
+        title: "Founder & CEO",
+        name: { first: "BOBBY", last: "Morgan Hitchcock" },
+        marketing: true,
+    });
+    return created;
+}
+
+export async function queryPeople(db: Surreal) {
+    const people = await db.select("person");
+    return people;
+}
+
+export async function updatePerson(db: Surreal, personId: string) {
+    const updated = await db.merge(new RecordId('person', personId), {
+        marketing: false,
+    });
+    return updated;
+}
