@@ -1,8 +1,8 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI || "";  // MongoDB URI from .env.local
-const dbName = process.env.MONGODB_DB || "Cluster0";  // The database is Cluster0
-const collectionName = "surveys";  // The collection is "surveys"
+const uri = process.env.MONGODB_URI || "";
+const dbName = process.env.MONGODB_DB || "Cluster0";
+const collectionName = "surveys";
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
