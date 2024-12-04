@@ -5,7 +5,7 @@ import { Question, QuestionType } from "../../types";
 import MultipleChoice from "../../components/MultipleChoice";
 import TextEntry from "../../components/TextEntry";
 
-// Function to send survey data to the backend
+
 const saveSurveyToDatabase = async (title: string, description: string, questions: Question[]) => {
   try {
     const response = await fetch("/api/survey", {
@@ -103,7 +103,6 @@ const SurveyBuilder = () => {
         ))}
       </div>
 
-      {/* Save Button */}
       <div className="mt-4">
         <button
           onClick={() => saveSurveyToDatabase(title, description, questions)}
