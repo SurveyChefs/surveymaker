@@ -44,7 +44,12 @@ const SurveyBuilder = () => {
   const addQuestion = (question: Question) => {
     setQuestions((prev) => [...prev, question]);
     setSelectedType(null);
-    setShowQuestionTypes(false); // Hide the question type selection after adding a question
+    setShowQuestionTypes(false); 
+  };
+
+  const handleCancel = () => {
+    setShowQuestionTypes(false); 
+    setSelectedType(null); 
   };
 
   return (
@@ -105,27 +110,28 @@ const SurveyBuilder = () => {
           )}
         </div>
 
+  
         {selectedType === "multipleChoice" && (
-          <MultipleChoice onAddQuestion={addQuestion} />
+          <MultipleChoice onAddQuestion={addQuestion} onCancel={handleCancel} />
         )}
         {selectedType === "textEntry" && (
-          <TextEntry onAddQuestion={addQuestion} />
+          <TextEntry onAddQuestion={addQuestion} onCancel={handleCancel} />
         )}
 
         <h2 className="text-lg font-semibold mt-6">Survey Preview</h2>
         <div className="mt-4 border border-gray-600 rounded p-4">
-          {title && <h3 className="text-lg font-bold">{title}</h3>}
-          {description && <p className="text-gray-300">{description}</p>}
+          {title && <h3 className="text-lg font-bold">Title: {title}</h3>}
+          {description && <p className="text-gray-300">Description: {description}</p>}
 
           {questions.map((q, index) => (
             <div
               key={index}
               className="mt-4 p-2 border border-gray-600 rounded"
             >
-              <h3>{q.name}</h3>
+              <h3>Question: {q.name}</h3>
               <ul>
                 {q.answers?.map((a, i) => (
-                  <li key={i}>{a}</li>
+                  <li key={i}>Answer: {a}</li>
                 ))}
               </ul>
             </div>
@@ -133,12 +139,6 @@ const SurveyBuilder = () => {
         </div>
 
         <div className="mt-4 flex gap-4">
-          <button
-            onClick={() => setShowQuestionTypes(true)}
-            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Add More Fields
-          </button>
           <button
             onClick={() => saveSurveyToDatabase(title, description, questions)}
             className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600"
