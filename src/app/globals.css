@@ -1,6 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
+.lato-regular {
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 
 :root {
   --background: #ffffff;
@@ -17,9 +27,23 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Lato", sans-serif;
+  font-weight: 700;
+  font-style: normal;
 }
 button {
   cursor: pointer;
   
+}
+
+.types-btn {
+  background-color: #5941BE;
+}
+
+.types-btn:hover  {
+  background-color: #453394;
+}
+
+.types-btn-active {
+  background-color: #9589c1; /* Active color */
 }

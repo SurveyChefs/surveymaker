@@ -50,10 +50,10 @@ const SurveyBuilder = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-8">
       <div className="w-full max-w-lg bg-gray-800 text-white p-6 rounded-lg shadow-md">
-        <h1 className="text-xl font-semibold mb-4">Reactive Survey Builder</h1>
+        <h1 className="mb-4">Reactive Survey Builder</h1>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Survey Title</label>
+          <label className="block mb-1">Survey Title</label>
           <input
             type="text"
             placeholder="Enter survey title"
@@ -64,7 +64,7 @@ const SurveyBuilder = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Survey Description</label>
+          <label className="block mb-1">Survey Description</label>
           <textarea
             placeholder="Enter survey description"
             value={description}
@@ -74,9 +74,9 @@ const SurveyBuilder = () => {
         </div>
 
         <div className="mb-4">
-          <button
+          <button 
             onClick={() => setShowQuestionTypes((prev) => !prev)}
-            className="w-full p-2 bg-gray-900 text-white rounded hover:bg-blue-600"
+            className={`types-btn w-full p-2 text-white rounded ${showQuestionTypes ? "types-btn-active" : ""}`}
           >
             Add Question Types
           </button>

@@ -95,7 +95,7 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion }) => {
         <div key={index} className="mb-6">
           <input
             type="text"
-            placeholder="Question Name"
+            placeholder="Question Title"
             value={q.questionName}
             onChange={(e) => handleQuestionNameChange(index, e.target.value)}
             className="block w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
@@ -105,7 +105,7 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion }) => {
             <div key={answerIndex} className="flex items-center mb-2">
               <input
                 type="text"
-                placeholder="Add an answer"
+                placeholder="Answer Field"
                 value={answer}
                 onChange={(e) =>
                   handleAnswerChange(index, answerIndex, e.target.value)
@@ -126,7 +126,7 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion }) => {
             onClick={() => addAnswerField(index)}
             className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            +
+            Add Field
           </button>
         </div>
       ))}
