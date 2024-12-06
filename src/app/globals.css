@@ -38,6 +38,7 @@ button {
 
 .types-btn {
   background-color: #5941BE;
+  
 }
 
 .types-btn:hover  {
@@ -46,4 +47,5 @@ button {
 
 .types-btn-active {
   background-color: #43318f; 
+  
 }

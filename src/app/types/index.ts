@@ -3,9 +3,7 @@ export type QuestionType = "multipleChoice" | "textEntry" | "matrixTable" | "sli
 export interface Question {
   type: QuestionType;
   name: string;
+  description : string;
   answers?: string[]; 
 }
 
-interface answers{
-    
-}
