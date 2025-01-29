@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import HomeButton from "@/app/components/HomeButton";
+
 async function getSurveys() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/survey`, {
     cache: "no-store",
@@ -16,6 +18,7 @@ export default async function SurveysList() {
     <div className="min-h-screen bg-gray-900 p-8">
       <div className="mx-auto max-w-4xl">
         <h1 className="mb-8 text-4xl font-bold text-white">Available Surveys</h1>
+        < HomeButton />
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {surveys.map((survey: any) => (

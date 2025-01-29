@@ -5,6 +5,8 @@ import { Question, QuestionType } from "../../types";
 import MultipleChoice from "../../components/MultipleChoice";
 import TextEntry from "../../components/TextEntry";
 
+import HomeButton from "@/app/components/HomeButton";
+
 const saveSurveyToDatabase = async (
   title: string,
   description: string,
@@ -56,6 +58,7 @@ const SurveyBuilder = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-8">
       <div className="w-full max-w-lg bg-gray-800 text-white p-6 rounded-lg shadow-md">
         <h1 className="mb-4">Reactive Survey Builder</h1>
+        <HomeButton />
 
         <div className="mb-4">
           <label className="block mb-1">Survey Title</label>

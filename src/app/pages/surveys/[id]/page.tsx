@@ -5,6 +5,8 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
 
+import HomeButton from "@/app/components/HomeButton";
+
 interface Question {
   type: string;
   name: string;
@@ -112,6 +114,8 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
           <h1 className="mb-4 text-3xl font-bold text-white">{survey.title}</h1>
           <p className="mb-8 text-lg text-gray-300">{survey.description}</p>
+
+          <HomeButton />
 
           <div className="space-y-6">
             {survey.questions.map((question, index) => (
