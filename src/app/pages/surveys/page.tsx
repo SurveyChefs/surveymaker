@@ -1,39 +1,48 @@
+// src/app/surveys/page.tsx
 import Link from "next/link";
 
 async function getSurveys() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/survey`, {
-      cache: "no-store",
-    });
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/survey`, {
+    cache: "no-store",
+  });
 
-    if (!res.ok) throw new Error("Failed to fetch surveys");
-    return await res.json();
-  } catch (error) {
-    console.error("Fetch error:", error);
-    return [];
-  }
+  if (!res.ok) throw new Error("Failed to fetch surveys");
+  return res.json();
 }
 
 export default async function SurveysList() {
   const surveys = await getSurveys();
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-8">Available Surveys</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {surveys.map((survey: any) => (
-          <Link 
-            key={survey._id}
-            href={`/pages/surveys/${survey._id}`}
-            className="block p-6 bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-50"
-          >
-            <h2 className="text-xl font-semibold mb-2">{survey.title}</h2>
-            <p className="text-gray-600">{survey.description}</p>
-            <div className="mt-4 text-sm text-gray-500">
-              Created: {new Date(survey.createdAt).toLocaleDateString()}
-            </div>
-          </Link>
-        ))}
+    <div className="min-h-screen bg-gray-900 p-8">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-8 text-4xl font-bold text-white">Available Surveys</h1>
+        
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {surveys.map((survey: any) => (
+            <Link
+              key={survey._id}
+              href={`/pages/surveys/${survey._id}`}
+              className="transform transition-all duration-200 hover:scale-105"
+            >
+              <div className="h-full rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md hover:border-gray-500">
+                <div className="flex h-full flex-col justify-between">
+                  <div>
+                    <h2 className="mb-2 line-clamp-1 text-xl font-semibold text-white">
+                      {survey.title}
+                    </h2>
+                    <p className="mb-4 line-clamp-2 text-gray-300">
+                      {survey.description}
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Created: {new Date(survey.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
