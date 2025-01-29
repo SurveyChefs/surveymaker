@@ -1,4 +1,3 @@
-// src/app/surveys/page.tsx
 import Link from "next/link";
 
 async function getSurveys() {

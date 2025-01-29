@@ -21,8 +21,8 @@ const QuestionSchema = new Schema({
 });
 
 const SurveySchema = new Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
+  title: { type: String},
+  description: { type: String},
   questions: [QuestionSchema],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
