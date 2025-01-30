@@ -31,9 +31,11 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
 
   const { id } = use(params);
 
+  // When component mounts, fetch the survey data
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
+        // Make sure the ID is a valid ObjectId
         if (!/^[0-9a-fA-F]{24}$/.test(id)) {
           notFound();
         }
@@ -58,6 +60,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     fetchSurvey();
   }, [id]);
 
+  // When answers change save state
   const handleAnswerChange = (questionIndex: number, answer: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -65,6 +68,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     }));
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setError("");
@@ -88,6 +92,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         throw new Error("Failed to submit answers");
       }
 
+      // Redirect to home page
       router.push("/");
     } catch (err) {
       setError("Failed to submit answers. Please try again.");

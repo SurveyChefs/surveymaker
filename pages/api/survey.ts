@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Survey from "@/app/models/survey";
 import connectToDatabase from "@/lib/mongodb";
 
+// Connect to the database
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   await connectToDatabase();
 
@@ -10,9 +11,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       case 'GET':
         const { id } = req.query;
         
+        // Fetches survey by ID
         if (id) {
           const survey = await Survey.findById(id);
           if (!survey) return res.status(404).json({ message: "Survey not found" });
+          // Converts the data to JSON format
           return res.status(200).json({
             ...survey.toObject(),
             _id: survey._id.toString(),
@@ -34,19 +37,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (req.method === "POST") {
           try {
       
+            // Connect to the database
             await connectToDatabase();
       
-      
+            // Survey data getting from the request body
             const { title, description, questions } = req.body;
             const survey = new Survey({
               title,
               description,
               questions,
             });
-      
-      
+
+            // Save the survey to the database
             await survey.save();
-      
       
             return res.status(201).json({ message: "Survey created successfully", survey });
           } catch (error) {

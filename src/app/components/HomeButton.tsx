@@ -5,8 +5,8 @@ export default function HomeButton() {
     <div className="fixed bottom-4 right-4 z-50">
       <Link
         href="/"
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition-colors duration-200"
-      >
+        className="bg-gray-800 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-colors duration-200 border-2 border-white"
+        >
         Home
       </Link>
     </div>
