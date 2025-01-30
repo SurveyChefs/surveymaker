@@ -8,8 +8,8 @@ export interface ISurveyAnswer extends Document {
 }
 
 const SurveyAnswerSchema = new Schema({
-  surveyId: Schema.Types.Mixed,
-  answers: []
+  surveyId: { type: Schema.Types.ObjectId, ref: 'Survey', required: true },
+  answers: { type: Array, required: true },
 }, {
   timestamps: true,
   collection: "surveyAnswers"

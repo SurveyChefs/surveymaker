@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { use } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
-
 import HomeButton from "@/app/components/HomeButton";
 
 interface Question {
@@ -23,19 +21,19 @@ interface Survey {
 
 export default function SurveyPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const resolvedParams = use(params);
+  const { id } = resolvedParams;
+
+  const [answers, setAnswers] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { id } = use(params);
-
-  // When component mounts, fetch the survey data
+  // Fetch survey data
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        // Make sure the ID is a valid ObjectId
         if (!/^[0-9a-fA-F]{24}$/.test(id)) {
           notFound();
         }
@@ -60,12 +58,13 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     fetchSurvey();
   }, [id]);
 
-  // When answers change save state
+  // Handle answer changes
   const handleAnswerChange = (questionIndex: number, answer: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionIndex]: answer,
-    }));
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      newAnswers[questionIndex] = answer;
+      return newAnswers;
+    });
   };
 
   // Handle form submission
@@ -74,15 +73,15 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     setError("");
 
     try {
-      const response = await fetch("/api/answer", { /////// HERE
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           surveyId: id,
-          answers: Object.entries(answers).map(([index, answer]) => ({
-            questionIndex: Number(index),
+          answers: answers.map((answer, index) => ({
+            questionIndex: index,
             answer,
           })),
         }),
@@ -92,7 +91,6 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         throw new Error("Failed to submit answers");
       }
 
-      // Redirect to home page
       router.push("/");
     } catch (err) {
       setError("Failed to submit answers. Please try again.");
@@ -119,9 +117,9 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
           <h1 className="mb-4 text-3xl font-bold text-white">{survey.title}</h1>
           <p className="mb-8 text-lg text-gray-300">{survey.description}</p>
-
+  
           <HomeButton />
-
+  
           <div className="space-y-6">
             {survey.questions.map((question, index) => (
               <div
@@ -131,7 +129,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
                 <h3 className="mb-4 text-xl font-semibold text-white">
                   {question.name}
                 </h3>
-
+  
                 {question.type === "multipleChoice" && (
                   <div className="space-y-3">
                     {question.answers?.map((answer, ansIndex) => (
@@ -154,10 +152,21 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
                     ))}
                   </div>
                 )}
+  
+                {question.type === "textEntry" && (
+                  <textarea
+                    value={answers[index] || ""}
+                    onChange={(e) => handleAnswerChange(index, e.target.value)}
+                    className="w-full p-3 bg-gray-800 border-2 border-blue-500 rounded-md text-white 
+                      focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Type your answer here..."
+                    rows={4}
+                  />
+                )}
               </div>
             ))}
           </div>
-
+  
           <div className="mt-8">
             <button
               onClick={handleSubmit}
@@ -167,7 +176,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
             >
               {isSubmitting ? "Submitting..." : "Submit Survey"}
             </button>
-
+  
             {error && <p className="mt-2 text-red-400 text-sm">{error}</p>}
           </div>
         </div>
