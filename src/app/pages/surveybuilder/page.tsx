@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Question, QuestionType } from "../../types";
 import MultipleChoice from "../../components/MultipleChoice";
 import TextEntry from "../../components/TextEntry";
+import Navbar from "@/app/components/Navbar";
 
 import HomeButton from "@/app/components/HomeButton";
 
@@ -55,7 +56,10 @@ const SurveyBuilder = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-8">
+
+    <div>
+      <Navbar />
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-8">
       <div className="w-full max-w-lg bg-gray-800 text-white p-6 rounded-lg shadow-md">
         <h1 className="mb-4">Reactive Survey Builder</h1>
         <HomeButton />
@@ -151,6 +155,8 @@ const SurveyBuilder = () => {
         </div>
       </div>
     </div>
+    </div>
+    
   );
 };
 
