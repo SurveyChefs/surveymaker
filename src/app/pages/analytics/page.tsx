@@ -1,44 +1,41 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import SurveyChart from '@/app/components/SurveyChart';
-import HomeButton from '@/app/components/HomeButton';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-interface SurveyData {
-  _id: {
-    question: string;
-    answer: string;
-  };
-  count: number;
+interface SurveyStats {
+  title: string;
+  responseCount: number;
+  surveyId: string;
 }
 
-const AnalyticsPage: React.FC = () => {
-  const [chartData, setChartData] = useState<{ labels: string[]; counts: number[] }>({ labels: [], counts: [] });
+export default function AnalyticsPage() {
+  const [surveyStats, setSurveyStats] = useState<SurveyStats[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch('/api/analytics');
-      const data: SurveyData[] = await response.json();
-
-      const labels = [...new Set(data.map((item) => item._id.question))];
-      const counts = labels.map((label) =>
-        data
-          .filter((item) => item._id.question === label)
-          .reduce((acc, curr) => acc + curr.count, 0)
-      );
-
-      setChartData({ labels, counts });
+    const fetchSurveyStats = async () => {
+      const res = await fetch("/api/analytics");
+      const data = await res.json();
+      setSurveyStats(data);
     };
 
-    fetchData();
+    fetchSurveyStats();
   }, []);
 
   return (
-    <div style={{ width: '40%', height: '400px', margin: '0 auto' }}>
-  <SurveyChart data={chartData} />
-  <HomeButton />
+    <div>
+      <h1>Survey Analytics</h1>
+      <div>
+        {surveyStats.map((survey) => (
+          <div key={survey.surveyId}>
+            <h3>
+              <Link href={`/pages/analytics/${survey.surveyId}`}>
+                {survey.title} - {survey.responseCount} responses
+              </Link>
+            </h3>
+          </div>
+        ))}
+      </div>
     </div>
   );
-};
-
-export default AnalyticsPage;
+}

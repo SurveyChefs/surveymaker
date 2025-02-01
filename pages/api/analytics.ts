@@ -1,59 +1,30 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import connectToDatabase from '@/lib/mongodb';
-import mongoose from 'mongoose';
+import { NextApiRequest, NextApiResponse } from "next";
 
-interface SurveyAnswer {
-  surveyId: mongoose.Types.ObjectId;
-  answers: {
-    questionIndex: number;
-    answer: string;
-  }[];
-}
+import connectToDatabase from "@/lib/mongodb";
+import Survey from "@/app/models/survey";
+import SurveyAnswer from "@/app/models/surveyAnswer";
 
-interface Survey {
-  _id: mongoose.Types.ObjectId;
-  questions: {
-    name: string;
-  }[];
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  await connectToDatabase();
   try {
-    const mongoose = await connectToDatabase();
-    const db = mongoose.connection;
+    const surveys = await Survey.find({});
+    
+    const surveyStats = await Promise.all(
+      surveys.map(async (survey) => {
+        const responseCount = await SurveyAnswer.countDocuments({ surveyId: survey._id });
+        return {
+          title: survey.title,
+          responseCount,
+          surveyId: survey._id.toString(),
+        };
+      })
+    );
 
-    const surveyAnswers = await db.collection('surveyAnswers').aggregate([
-      {
-        $lookup: {
-          from: 'surveys',
-          localField: 'surveyId',
-          foreignField: '_id',
-          as: 'surveyData',
-        },
-      },
-      { $unwind: '$surveyData' },
-      { $unwind: '$answers' },
-      {
-        $project: {
-          answer: '$answers.answer',
-          questionIndex: '$answers.questionIndex',
-          question: { $arrayElemAt: ['$surveyData.questions', '$answers.questionIndex'] },
-        },
-      },
-      {
-        $group: {
-          _id: {
-            question: '$question.name',
-            answer: '$answer',
-          },
-          count: { $sum: 1 },
-        },
-      },
-    ]).toArray() as unknown as { _id: { question: string; answer: string }; count: number }[];
-
-    res.status(200).json(surveyAnswers);
+    res.status(200).json(surveyStats);
   } catch (error) {
-    console.error("Error fetching survey data:", error);
-    res.status(500).json({ message: 'Error fetching survey data' });
+    console.error("Error fetching survey statistics:", error);
+    res.status(500).json({ message: "Error fetching survey statistics" });
   }
-}
+};
+
+export default handler;
