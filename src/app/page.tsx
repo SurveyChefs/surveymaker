@@ -26,13 +26,11 @@ export default function Home() {
           Go to Survey Taker
         </button>
         </Link>
-        <a
-              className="rounded-full bg-gray-800 border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-9 sm:min-w-44 "
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              User Information 
-        </a>
+        <Link href="/pages/analytics">
+        <button className="mb-4 ml-1.5 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44">
+          Analytics
+        </button>
+        </Link>
         </div>
         
 
