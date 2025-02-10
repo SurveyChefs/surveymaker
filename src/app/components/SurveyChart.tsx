@@ -16,9 +16,17 @@ const SurveyChart = ({ data }: { data: { [key: string]: number } }) => {
     ],
   };
 
-  return (
-    <Pie data={chartData} />
-  );
+  const options = {
+    plugins: {
+      legend: {
+        labels: {
+          color: "white",
+        },
+      },
+    },
+  };
+
+  return <Pie data={chartData} options={options} />;
 };
 
 export default SurveyChart;

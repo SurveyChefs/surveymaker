@@ -71,7 +71,6 @@ const SurveyDetail = () => {
             </div>
           ))}
         </div>
-        <HomeButton />
       </div>
     </div>
   );
