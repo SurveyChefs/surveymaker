@@ -41,7 +41,7 @@ const SurveyBuilder = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [showQuestionTypes, setShowQuestionTypes] = useState(false);
   const [selectedType, setSelectedType] = useState<QuestionType | null>(null);
-  const [showPreview, setShowPreview] = useState(false);  // State for modal visibility
+  const [showPreview, setShowPreview] = useState(false);  
 
   const addQuestion = (question: Question) => {
     setQuestions((prev) => [...prev, question]);
