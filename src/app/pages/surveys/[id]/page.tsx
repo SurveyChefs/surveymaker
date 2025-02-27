@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
 import HomeButton from "@/app/components/HomeButton";
+import Navbar from "@/app/components/Navbar";
 
 interface Question {
   type: string;
@@ -112,7 +113,10 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
+
+    <div>
+      <Navbar />
+      <div className="min-h-screen bg-gray-900 p-8">
       <div className="mx-auto max-w-2xl">
         <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
           <h1 className="mb-4 text-3xl font-bold text-white">{survey.title}</h1>
@@ -182,5 +186,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         </div>
       </div>
     </div>
+    </div>
+    
   );
 }
