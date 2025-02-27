@@ -63,83 +63,97 @@ const SurveyBuilder = () => {
     <div>
       <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gray-900 p-8">
-        <div className="w-full max-w-lg bg-gray-800 text-white p-6 rounded-lg shadow-md">
-          <h1 className="mb-4">Reactive Survey Builder</h1>
+        <div className="w-full max-w-2xl bg-gray-800 text-white p-8 rounded-lg shadow-xl">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4 text-blue-400">Reactive Survey Builder</h1>
+            <p className="text-xl text-gray-300">Create interactive surveys with skip logic and dynamic responses</p>
+          </div>
 
-          <div className="mb-4">
-            <label className="block mb-1">Survey Title</label>
+          <div className="mb-6">
+            <label className="block mb-2 text-lg">Survey Title</label>
             <input
               type="text"
               placeholder="Enter survey title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block mb-1">Survey Description</label>
+          <div className="mb-6">
+            <label className="block mb-2 text-lg">Survey Description</label>
             <textarea
               placeholder="Enter survey description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+              rows={4}
             />
           </div>
 
-          <div className="mb-4">
+          <div className="mb-6">
             <button
               onClick={() => setShowQuestionTypes((prev) => !prev)}
-              className={`types-btn w-full p-2 text-white rounded ${showQuestionTypes ? "types-btn-active" : ""}`}
+              className={`w-full p-3 text-lg font-semibold text-white rounded-lg transition-colors duration-200 ${
+                showQuestionTypes 
+                ? "bg-blue-600 hover:bg-blue-700" 
+                : "bg-blue-500 hover:bg-blue-600"
+              }`}
             >
-              Add Question Types
+              {showQuestionTypes ? "Hide Question Types" : "Add Question"}
             </button>
 
             {showQuestionTypes && (
-              <div className="border border-gray-600 rounded p-4 mt-2">
-                <button
-                  onClick={() => setSelectedType("multipleChoice")}
-                  className="block w-full p-2 bg-gray-700 text-white rounded mb-2 hover:bg-gray-600"
-                >
-                  Multiple Choice
-                </button>
-                <button
-                  onClick={() => setSelectedType("textEntry")}
-                  className="block w-full p-2 bg-gray-700 text-white rounded mb-2 hover:bg-gray-600"
-                >
-                  Text Entry
-                </button>
+              <div className="mt-4 border border-gray-600 rounded-lg p-4 bg-gray-750">
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    onClick={() => setSelectedType("multipleChoice")}
+                    className="p-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-lg"
+                  >
+                    Multiple Choice
+                  </button>
+                  <button
+                    onClick={() => setSelectedType("textEntry")}
+                    className="p-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-lg"
+                  >
+                    Text Entry
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
           {selectedType === "multipleChoice" && (
-            <MultipleChoice 
-              onAddQuestion={addQuestion} 
-              onCancel={handleCancel}
-              questionIndex={questions.length}
-              totalQuestions={questions.length}
-            />
+            <div className="mb-6">
+              <MultipleChoice 
+                onAddQuestion={addQuestion} 
+                onCancel={handleCancel}
+                questionIndex={questions.length}
+                totalQuestions={questions.length}
+              />
+            </div>
           )}
           {selectedType === "textEntry" && (
-            <TextEntry 
-              onAddQuestion={(question) => addQuestion({ ...question, index: questions.length })} 
-              onCancel={handleCancel}
-            />
+            <div className="mb-6">
+              <TextEntry 
+                onAddQuestion={(question) => addQuestion({ ...question, index: questions.length })} 
+                onCancel={handleCancel}
+              />
+            </div>
           )}
 
-          <div className="mt-4 flex gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => saveSurveyToDatabase(title, description, questions)}
-              className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600"
+              className="p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={questions.length === 0}
             >
-              Submit
+              Save Survey
             </button>
 
             <button
               onClick={() => setShowPreview(true)}
-              className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={questions.length === 0}
             >
               Preview Survey
