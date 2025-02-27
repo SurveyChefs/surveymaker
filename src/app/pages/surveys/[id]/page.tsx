@@ -10,6 +10,7 @@ interface Question {
   type: string;
   name: string;
   answers?: string[];
+  skipLogic?: { answer: string; skipToIndex: number }[];
 }
 
 interface Survey {
@@ -26,6 +27,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
   const { id } = resolvedParams;
 
   const [answers, setAnswers] = useState<string[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [survey, setSurvey] = useState<Survey | null>(null);
@@ -64,6 +66,23 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     setAnswers(prev => {
       const newAnswers = [...prev];
       newAnswers[questionIndex] = answer;
+
+      // Check for skip logic
+      const currentQuestion = survey?.questions[questionIndex];
+      if (currentQuestion?.skipLogic) {
+        const skipLogic = currentQuestion.skipLogic.find(logic => logic.answer === answer);
+        if (skipLogic) {
+          // Skip to the specified question
+          setCurrentQuestionIndex(skipLogic.skipToIndex);
+        } else {
+          // Move to next question if no skip logic matches
+          setCurrentQuestionIndex(questionIndex + 1);
+        }
+      } else {
+        // Move to next question if no skip logic
+        setCurrentQuestionIndex(questionIndex + 1);
+      }
+
       return newAnswers;
     });
   };
@@ -112,81 +131,99 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     notFound();
   }
 
-  return (
+  const currentQuestion = survey.questions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
 
+  return (
     <div>
       <Navbar />
       <div className="min-h-screen bg-gray-900 p-8">
-      <div className="mx-auto max-w-2xl">
-        <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
-          <h1 className="mb-4 text-3xl font-bold text-white">{survey.title}</h1>
-          <p className="mb-8 text-lg text-gray-300">{survey.description}</p>
-  
-          <HomeButton />
-  
-          <div className="space-y-6">
-            {survey.questions.map((question, index) => (
-              <div
-                key={index}
-                className="rounded-lg border border-gray-600 bg-gray-700 p-4"
-              >
-                <h3 className="mb-4 text-xl font-semibold text-white">
-                  {question.name}
-                </h3>
-  
-                {question.type === "multipleChoice" && (
-                  <div className="space-y-3">
-                    {question.answers?.map((answer, ansIndex) => (
-                      <div key={ansIndex} className="flex items-center">
-                        <input
-                          type="radio"
-                          id={`q${index}-a${ansIndex}`}
-                          name={`question-${index}`}
-                          className="h-4 w-4 text-blue-500 focus:ring-2 focus:ring-blue-500"
-                          onChange={() => handleAnswerChange(index, answer)}
-                          checked={answers[index] === answer}
-                        />
-                        <label
-                          htmlFor={`q${index}-a${ansIndex}`}
-                          className="ml-3 text-gray-200"
-                        >
-                          {answer}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-  
-                {question.type === "textEntry" && (
-                  <textarea
-                    value={answers[index] || ""}
-                    onChange={(e) => handleAnswerChange(index, e.target.value)}
-                    className="w-full p-3 bg-gray-800 border-2 border-blue-500 rounded-md text-white 
-                      focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Type your answer here..."
-                    rows={4}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-  
-          <div className="mt-8">
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="w-full p-3 bg-green-500 text-white rounded hover:bg-green-600 
-                disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSubmitting ? "Submitting..." : "Submit Survey"}
-            </button>
-  
+        <div className="mx-auto max-w-2xl">
+          <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
+            <h1 className="mb-4 text-3xl font-bold text-white">{survey.title}</h1>
+            <p className="mb-8 text-lg text-gray-300">{survey.description}</p>
+
+            <HomeButton />
+
+            <div className="space-y-6">
+              {currentQuestion && (
+                <div className="rounded-lg border border-gray-600 bg-gray-700 p-4">
+                  <h3 className="mb-4 text-xl font-semibold text-white">
+                    Question {currentQuestionIndex + 1}: {currentQuestion.name}
+                  </h3>
+
+                  {currentQuestion.type === "multipleChoice" && (
+                    <div className="space-y-3">
+                      {currentQuestion.answers?.map((answer, ansIndex) => (
+                        <div key={ansIndex} className="flex items-center">
+                          <input
+                            type="radio"
+                            id={`q${currentQuestionIndex}-a${ansIndex}`}
+                            name={`question-${currentQuestionIndex}`}
+                            className="h-4 w-4 text-blue-500 focus:ring-2 focus:ring-blue-500"
+                            onChange={() => handleAnswerChange(currentQuestionIndex, answer)}
+                            checked={answers[currentQuestionIndex] === answer}
+                          />
+                          <label
+                            htmlFor={`q${currentQuestionIndex}-a${ansIndex}`}
+                            className="ml-3 text-gray-200"
+                          >
+                            {answer}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(!currentQuestion.type || currentQuestion.type === "textEntry") && (
+                    <textarea
+                      value={answers[currentQuestionIndex] || ""}
+                      onChange={(e) => handleAnswerChange(currentQuestionIndex, e.target.value)}
+                      className="w-full p-3 bg-gray-800 border-2 border-blue-500 rounded-md text-white 
+                        focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Type your answer here..."
+                      rows={4}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 flex gap-4">
+              {currentQuestionIndex > 0 && (
+                <button
+                  onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
+                  className="flex-1 p-3 bg-gray-600 text-white rounded hover:bg-gray-700 
+                    transition-colors"
+                >
+                  Previous
+                </button>
+              )}
+              
+              {!isLastQuestion ? (
+                <button
+                  onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+                  className="flex-1 p-3 bg-blue-500 text-white rounded hover:bg-blue-600 
+                    transition-colors"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="flex-1 p-3 bg-green-500 text-white rounded hover:bg-green-600 
+                    disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Survey"}
+                </button>
+              )}
+            </div>
+
             {error && <p className="mt-2 text-red-400 text-sm">{error}</p>}
           </div>
         </div>
       </div>
     </div>
-    </div>
-    
   );
 }

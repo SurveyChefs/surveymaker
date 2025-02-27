@@ -109,52 +109,38 @@ const SurveyBuilder = () => {
                 >
                   Text Entry
                 </button>
-                <button className="block w-full p-2 bg-gray-700 text-white rounded mb-2 hover:bg-gray-600">
-                  Slider
-                </button>
-                <button className="block w-full p-2 bg-gray-700 text-white rounded mb-2 hover:bg-gray-600">
-                  Matrix
-                </button>
               </div>
             )}
           </div>
 
           {selectedType === "multipleChoice" && (
-            <MultipleChoice onAddQuestion={addQuestion} onCancel={handleCancel} />
+            <MultipleChoice 
+              onAddQuestion={addQuestion} 
+              onCancel={handleCancel}
+              questionIndex={questions.length}
+              totalQuestions={questions.length}
+            />
           )}
           {selectedType === "textEntry" && (
-            <TextEntry onAddQuestion={addQuestion} onCancel={handleCancel} />
+            <TextEntry 
+              onAddQuestion={(question) => addQuestion({ ...question, index: questions.length })} 
+              onCancel={handleCancel}
+            />
           )}
-
-          <h2 className="text-lg font-semibold mt-6">Survey Preview</h2>
-          <div className="mt-4 border border-gray-600 rounded p-4">
-            {title && <h3 className="text-lg font-bold">Title: {title}</h3>}
-            {description && <p className="text-gray-300">Description: {description}</p>}
-
-            {questions.map((q, index) => (
-              <div key={index} className="mt-4 p-2 border border-gray-600 rounded">
-                <h3>Question: {q.name}</h3>
-                <ul>
-                  {q.answers?.map((a, i) => (
-                    <li key={i}>Answer: {a}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
 
           <div className="mt-4 flex gap-4">
             <button
               onClick={() => saveSurveyToDatabase(title, description, questions)}
               className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-600"
+              disabled={questions.length === 0}
             >
               Submit
             </button>
 
-            {/* Preview Button */}
             <button
               onClick={() => setShowPreview(true)}
               className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              disabled={questions.length === 0}
             >
               Preview Survey
             </button>
@@ -165,27 +151,60 @@ const SurveyBuilder = () => {
       {/* Survey Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gray-800 text-white p-6 rounded-lg w-4/5 max-w-2xl">
-            <h2 className="text-2xl font-bold mb-4">Survey Preview</h2>
-            <h3 className="text-xl mb-2">Title: {title}</h3>
-            <p className="text-gray-300 mb-4">Description: {description}</p>
-            {questions.map((q, index) => (
-              <div key={index} className="mt-4 p-2 border border-gray-600 rounded">
-                <h3 className="font-semibold">Question: {q.name}</h3>
-                <ul>
-                  {q.answers?.map((a, i) => (
-                    <li key={i}>Answer: {a}</li>
-                  ))}
-                </ul>
+          <div className="bg-gray-900 p-8 rounded-lg w-full max-w-2xl">
+            <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
+              <h1 className="mb-4 text-3xl font-bold text-white">{title}</h1>
+              <p className="mb-8 text-lg text-gray-300">{description}</p>
+
+              <div className="space-y-6">
+                {questions.map((q, index) => (
+                  <div key={index} className="rounded-lg border border-gray-600 bg-gray-700 p-4">
+                    <h3 className="mb-4 text-xl font-semibold text-white">
+                      Question {index + 1}: {q.name}
+                    </h3>
+
+                    {q.type === "multipleChoice" && q.answers && (
+                      <div className="space-y-3">
+                        {q.answers.map((answer, ansIndex) => (
+                          <div key={ansIndex} className="flex items-center">
+                            <input
+                              type="radio"
+                              id={`q${index}-a${ansIndex}`}
+                              name={`question-${index}`}
+                              className="h-4 w-4 text-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                            <label
+                              htmlFor={`q${index}-a${ansIndex}`}
+                              className="ml-3 text-gray-200"
+                            >
+                              {answer}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {q.type === "textEntry" && (
+                      <textarea
+                        className="w-full p-3 bg-gray-800 border-2 border-blue-500 rounded-md text-white 
+                          focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Type your answer here..."
+                        rows={4}
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={handleClosePreview}
-                className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Close Preview
-              </button>
+
+              <div className="mt-8">
+                <button
+                  onClick={handleClosePreview}
+                  className="w-full p-3 bg-blue-500 text-white rounded hover:bg-blue-600 
+                    transition-colors"
+                >
+                  Close Preview
+                </button>
+              </div>
             </div>
           </div>
         </div>

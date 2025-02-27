@@ -10,7 +10,6 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-800 p-4 shadow-md">
       <div className="flex items-center justify-between">
-        {/* Wrap SurveyChampion text in Link to make it clickable */}
         <Link href="/" className="text-white text-xl font-semibold">
           SurveyChampion
         </Link>
@@ -26,7 +25,6 @@ export default function Navbar() {
           </div>
         </button>
 
-        {/* Desktop Menu (Visible on large screens) */}
         <div className="hidden lg:flex space-x-6 text-white">
           <Link href="/pages" className="hover:underline ml-7">
             Login
@@ -34,7 +32,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu (Hidden on large screens) */}
       <div
         className={`${
           isMenuOpen ? "block" : "hidden"
