@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Updated import for Next.js 13+
+import { useRouter } from "next/navigation";
 import { useAuth } from "../src/app/context/AuthContext"; // Adjust the import path
 
 export default function Login() {
@@ -30,6 +30,9 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        // Store the token in localStorage or cookie
+        localStorage.setItem("authToken", data.token);
+
         login(); // Call the login function to update the authentication state
         router.push("/"); // Redirect to the homepage
       } else {
@@ -91,7 +94,9 @@ export default function Login() {
 
         <p className="text-gray-300 text-sm mt-6 text-center">
           Don't have an account?{" "}
-          
+          <a href="/signup" className="text-purple-600 hover:underline">
+            Sign up
+          </a>
         </p>
       </div>
     </div>

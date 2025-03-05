@@ -28,7 +28,7 @@ async function connectToDatabase() {
   }
 
   cached.conn = await cached.promise;
-  return cached.conn.connection.db; // Return the database instance
+  return cached.conn; // Returning the full mongoose instance
 }
 
 export default connectToDatabase;

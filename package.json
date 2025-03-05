@@ -12,7 +12,8 @@
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
-    "mongodb": "^6.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.14.2",
     "mongoose": "^8.8.1",
     "next": "15.0.3",
     "next-auth": "^4.24.11",
@@ -21,6 +22,7 @@
     "surrealdb": "^1.0.6"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

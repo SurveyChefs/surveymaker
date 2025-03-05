@@ -7,7 +7,25 @@ export default function Home() {
   const { isAuthenticated, login, logout } = useAuth();
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 bg-gray-900 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[60px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 bg-gray-900 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      {/* Navbar Section */}
+      <nav className="w-full bg-gray-800 p-4 flex justify-between items-center text-white">
+        <div className="text-xl font-semibold">
+          <Link href="/">SurveyChampion</Link>
+        </div>
+        <div className="flex gap-6">
+          {isAuthenticated ? (
+            <span className="text-sm">Hello, User</span>
+          ) : (
+            <Link href="/login">
+              <button className="bg-gray-800 text-sm text-white rounded-full px-4 py-2 hover:bg-gray-600">
+                Login
+              </button>
+            </Link>
+          )}
+        </div>
+      </nav>
+
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <ol className="text-xl text-center font-[family-name:var(--font-geist-mono)]">
           <h1 className="mb-4 text-xl">SurveyChampion</h1>
@@ -50,6 +68,31 @@ export default function Home() {
             User Information
           </a>
         </div>
+
+        {/* Dashboard Section */}
+        {isAuthenticated && (
+          <div className="mt-10 w-full bg-gray-800 p-6 rounded-xl shadow-lg">
+            <h2 className="text-xl font-semibold text-center text-white mb-6">Dashboard</h2>
+            <div className="grid grid-cols-2 gap-6 text-white">
+              <div className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg">
+                <h3 className="text-lg font-semibold">Surveys Created</h3>
+                <p className="text-2xl">12</p>
+              </div>
+              <div className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg">
+                <h3 className="text-lg font-semibold">Surveys Completed</h3>
+                <p className="text-2xl">34</p>
+              </div>
+              <div className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg">
+                <h3 className="text-lg font-semibold">Active Participation</h3>
+                <p className="text-2xl">5</p>
+              </div>
+              <div className="flex flex-col items-center justify-center p-4 bg-gray-700 rounded-lg">
+                <h3 className="text-lg font-semibold">User Feedback</h3>
+                <p className="text-2xl">98%</p>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
