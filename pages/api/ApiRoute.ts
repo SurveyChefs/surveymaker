@@ -1,10 +1,10 @@
-// /pages/api/yourApiRoute.ts
+// pages/api/adminRoute.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { checkAdmin } from "../../../surveymaker/src/lib/checkAdmin"; // Adjust the path if needed
+import { checkAdmin } from "../../src/lib/checkAdmin";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   checkAdmin(req, res, () => {
-    // Your logic for the admin-protected route here
+    // Only admin users will reach here
     res.status(200).json({ message: "Welcome, admin!" });
   });
 }

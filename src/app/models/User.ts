@@ -1,11 +1,10 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// Define the user interface that extends from mongoose's Document type
 interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  role: "user" | "admin";  // Add the role field
+  role: "user" | "admin"; // Add the role field
 }
 
 const UserSchema = new Schema<IUser>({
@@ -25,8 +24,8 @@ const UserSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ["user", "admin"],  // Only allow "user" or "admin" as role values
-    default: "user",  // Default to "user" for new users
+    enum: ["user", "admin"], // Define allowed roles
+    default: "user", // Default role is "user"
   },
 });
 

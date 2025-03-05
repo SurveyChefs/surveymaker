@@ -15,7 +15,15 @@ export default function Home() {
         </div>
         <div className="flex gap-6">
           {isAuthenticated ? (
-            <span className="text-sm">Hello, User</span>
+            <>
+              <span className="text-sm">Hello, User</span>
+              <button
+                onClick={logout}
+                className="bg-gray-800 text-sm text-white rounded-full px-4 py-2 hover:bg-gray-600"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <Link href="/login">
               <button className="bg-gray-800 text-sm text-white rounded-full px-4 py-2 hover:bg-gray-600">
@@ -32,42 +40,24 @@ export default function Home() {
           <h3>Go take or create surveys</h3>
         </ol>
 
-        <div className="ml-10">
-          {/* Login/Logout Buttons */}
-          {isAuthenticated ? (
-            <button
-              onClick={logout}
-              className="mb-4 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            >
-              Logout
-            </button>
-          ) : (
-            <Link href="/login">
-              <button className="mb-4 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44">
-                Login
-              </button>
-            </Link>
-          )}
-
-          {/* Other Buttons */}
-          <Link href="/pages/surveybuilder">
-            <button className="mb-4 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44">
-              Go to Survey Builder
-            </button>
-          </Link>
-          <Link href="/pages/surveys">
-            <button className="mb-4 ml-1.5 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44">
-              Go to Survey Taker
-            </button>
-          </Link>
-          <a
-            className="rounded-full bg-gray-800 border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-9 sm:min-w-44 "
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            User Information
-          </a>
-        </div>
+        {/* Other Buttons */}
+        <Link href="/pages/surveybuilder">
+          <button className="mb-4 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44">
+            Go to Survey Builder
+          </button>
+        </Link>
+        <Link href="/pages/surveys">
+          <button className="mb-4 ml-1.5 bg-gray-800 rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44">
+            Go to Survey Taker
+          </button>
+        </Link>
+        <a
+          className="rounded-full bg-gray-800 border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-gray-900 hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-9 sm:min-w-44"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          User Information
+        </a>
 
         {/* Dashboard Section */}
         {isAuthenticated && (
