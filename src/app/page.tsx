@@ -11,7 +11,7 @@ export default function Home() {
         <main className="w-full max-w-2xl text-center">
           <div className="mb-12">
             <h1 className="text-6xl font-bold text-blue-400 mb-4">SurveyChampion</h1>
-            <p className="text-2xl text-gray-300">Create, Take, and Analyze Surveys with Ease</p>
+            <p className="text-2xl text-gray-300">Create, Take, and Analyse Surveys with Ease</p>
           </div>
 
           <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">

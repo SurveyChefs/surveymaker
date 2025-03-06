@@ -7,6 +7,7 @@ type Props = {
   onCancel: () => void;
   questionIndex: number;
   totalQuestions: number;
+  editingQuestion?: Question;
 };
 
 interface QuestionState {
@@ -15,10 +16,15 @@ interface QuestionState {
   skipLogic: { [key: string]: number };
 }
 
-const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionIndex, totalQuestions }) => {
-  const [questionName, setQuestionName] = useState("");
-  const [answers, setAnswers] = useState<string[]>([""]);
-  const [skipLogic, setSkipLogic] = useState<{ [key: string]: number }>({});
+const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionIndex, totalQuestions, editingQuestion }) => {
+  const [questionName, setQuestionName] = useState(editingQuestion?.name || "");
+  const [answers, setAnswers] = useState<string[]>(editingQuestion?.answers || [""]);
+  const [skipLogic, setSkipLogic] = useState<{ [key: string]: number }>(
+    editingQuestion?.skipLogic?.reduce((acc, logic) => {
+      acc[logic.answer] = logic.skipToIndex;
+      return acc;
+    }, {} as { [key: string]: number }) || {}
+  );
 
   const addAnswerField = () => {
     setAnswers(prev => [...prev, ""]);
@@ -83,18 +89,21 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionInde
         index: questionIndex,
         description: ""
       });
-
-      // Reset form
-      setQuestionName("");
-      setAnswers([""]);
-      setSkipLogic({});
     }
   };
 
+  const clearForm = () => {
+    setQuestionName("");
+    setAnswers([""]);
+    setSkipLogic({});
+  };
+  
   return (
     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
       <div className="mb-6">
-        <label className="block mb-3 text-lg font-semibold text-blue-400">Question Text</label>
+        <label className="block mb-3 text-lg font-semibold text-blue-400">
+          {editingQuestion ? "Edit Question" : "Question Title"}
+        </label>
         <input
           type="text"
           value={questionName}
@@ -127,21 +136,6 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionInde
                 className="flex-1 p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               
-              <select
-                value={skipLogic[answer] !== undefined ? skipLogic[answer].toString() : ""}
-                onChange={(e) => handleSkipLogicChange(answer, e.target.value)}
-                className="p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]"
-              >
-                <option value="">No Skip</option>
-                {Array.from({ length: totalQuestions + 1 }, (_, i) => i).map((num) => (
-                  num !== questionIndex && (
-                    <option key={num} value={num}>
-                      Skip to Q{num + 1}
-                    </option>
-                  )
-                ))}
-              </select>
-
               <button
                 onClick={() => removeAnswerField(index)}
                 className="p-2 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-lg transition-colors duration-200"
@@ -163,7 +157,14 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionInde
           className="flex-1 p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
             disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 text-lg font-semibold"
         >
-          Add Question
+          {editingQuestion ? "Update Question" : "Add Question"}
+        </button>
+        <button
+          onClick={clearForm}
+          className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 
+            transition-colors duration-200 text-lg font-semibold"
+        >
+          Clear Form
         </button>
         <button
           onClick={onCancel}
