@@ -10,21 +10,9 @@ type Props = {
   editingQuestion?: Question;
 };
 
-interface QuestionState {
-  questionName: string;
-  answers: string[];
-  skipLogic: { [key: string]: number };
-}
-
 const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionIndex, totalQuestions, editingQuestion }) => {
   const [questionName, setQuestionName] = useState(editingQuestion?.name || "");
   const [answers, setAnswers] = useState<string[]>(editingQuestion?.answers || [""]);
-  const [skipLogic, setSkipLogic] = useState<{ [key: string]: number }>(
-    editingQuestion?.skipLogic?.reduce((acc, logic) => {
-      acc[logic.answer] = logic.skipToIndex;
-      return acc;
-    }, {} as { [key: string]: number }) || {}
-  );
 
   const addAnswerField = () => {
     setAnswers(prev => [...prev, ""]);
@@ -32,70 +20,38 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionInde
 
   const removeAnswerField = (indexToRemove: number) => {
     setAnswers(prev => prev.filter((_, i) => i !== indexToRemove));
-    // Remove skip logic for removed answer
-    const newSkipLogic = { ...skipLogic };
-    delete newSkipLogic[answers[indexToRemove]];
-    setSkipLogic(newSkipLogic);
   };
 
   const handleAnswerChange = (index: number, value: string) => {
     setAnswers(prev => {
       const newAnswers = [...prev];
-      const oldAnswer = newAnswers[index];
       newAnswers[index] = value;
-
-      // Update skip logic with new answer text
-      if (oldAnswer in skipLogic) {
-        const skipTo = skipLogic[oldAnswer];
-        const newSkipLogic = { ...skipLogic };
-        delete newSkipLogic[oldAnswer];
-        newSkipLogic[value] = skipTo;
-        setSkipLogic(newSkipLogic);
-      }
-
       return newAnswers;
-    });
-  };
-
-  const handleSkipLogicChange = (answer: string, skipToIndex: string) => {
-    const skipTo = parseInt(skipToIndex);
-    
-    setSkipLogic(prev => {
-      const newSkipLogic = { ...prev };
-      if (skipToIndex === "") {
-        delete newSkipLogic[answer];
-      } else if (!isNaN(skipTo)) {
-        newSkipLogic[answer] = skipTo;
-      }
-      return newSkipLogic;
     });
   };
 
   const handleConfirm = () => {
     if (questionName.trim() && answers.some(a => a.trim())) {
       const validAnswers = answers.filter(a => a.trim());
-      const skipLogicArray: SkipLogic[] = Object.entries(skipLogic)
-        .filter(([answer]) => validAnswers.includes(answer))
-        .map(([answer, skipToIndex]) => ({
-          answer,
-          skipToIndex
-        }));
 
       onAddQuestion({
         type: "multipleChoice",
         name: questionName,
         answers: validAnswers,
-        skipLogic: skipLogicArray.length > 0 ? skipLogicArray : undefined,
         index: questionIndex,
         description: ""
       });
+
+      // Clear the form only if we're not editing an existing question
+      if (!editingQuestion) {
+        clearForm();
+      }
     }
   };
 
   const clearForm = () => {
     setQuestionName("");
     setAnswers([""]);
-    setSkipLogic({});
   };
   
   return (

@@ -20,8 +20,9 @@ const TextEntry: React.FC<Props> = ({ onAddQuestion, onCancel, editingQuestion }
         description: "",
         index: editingQuestion?.index ?? 0
       });
+      
       if (!editingQuestion) {
-        setQuestionName("");
+        clearForm();
       }
     }
   };

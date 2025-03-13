@@ -28,7 +28,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
   const { id } = resolvedParams;
 
   const [answers, setAnswers] = useState<string[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [survey, setSurvey] = useState<Survey | null>(null);
@@ -69,30 +69,42 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     setAnswers(prev => {
       const newAnswers = [...prev];
       newAnswers[questionIndex] = answer;
-
-      // Don't auto-advance if we're on the last question
-      if (questionIndex === survey.questions.length - 1) {
-        return newAnswers;
-      }
-
-      // Check for skip logic
-      const currentQuestion = survey?.questions[questionIndex];
-      if (currentQuestion?.skipLogic) {
-        const skipLogic = currentQuestion.skipLogic.find(logic => logic.answer === answer);
-        if (skipLogic) {
-          // Skip to the specified question
-          setCurrentQuestionIndex(skipLogic.skipToIndex);
-        } else {
-          // Move to next question if no skip logic matches
-          setCurrentQuestionIndex(questionIndex + 1);
-        }
-      } else {
-        // Move to next question if no skip logic
-        setCurrentQuestionIndex(questionIndex + 1);
-      }
-
       return newAnswers;
     });
+
+    // Update skipped questions based on skip logic
+    const currentQuestion = survey.questions[questionIndex];
+    if (currentQuestion?.skipLogic) {
+      const skipLogic = currentQuestion.skipLogic.find(logic => logic.answer === answer);
+      console.log('Found skip logic:', skipLogic, 'for answer:', answer);
+      
+      if (skipLogic) {
+        // Create a new set of skipped questions
+        const newSkipped = new Set<number>();
+        // Add all questions between current and skip-to index to skipped set
+        for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
+          newSkipped.add(i);
+        }
+        console.log('Setting skipped questions:', Array.from(newSkipped));
+        setSkippedQuestions(newSkipped);
+
+        // Also clear answers for skipped questions
+        setAnswers(prev => {
+          const newAnswers = [...prev];
+          for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
+            newAnswers[i] = '';
+          }
+          return newAnswers;
+        });
+      } else {
+        // If no skip logic for this answer, clear skipped questions after this question
+        setSkippedQuestions(new Set());
+        console.log('Clearing skip logic for answer:', answer);
+      }
+    } else {
+      // If question has no skip logic, clear any existing skips
+      setSkippedQuestions(new Set());
+    }
   };
 
   // Handle form submission
@@ -101,6 +113,12 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     setError("");
 
     try {
+      // Filter out skipped questions from answers
+      const validAnswers = answers.map((answer, index) => ({
+        questionIndex: index,
+        answer: skippedQuestions.has(index) ? "" : answer
+      })).filter(a => !skippedQuestions.has(a.questionIndex));
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/answer`, {
         method: "POST",
         headers: {
@@ -108,10 +126,7 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         },
         body: JSON.stringify({
           surveyId: id,
-          answers: answers.map((answer, index) => ({
-            questionIndex: index,
-            answer,
-          })),
+          answers: validAnswers,
         }),
       });
 
@@ -143,39 +158,6 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     }
   };
 
-  // Simplify isLastVisibleQuestion to just check if we're on the last question
-  const isLastVisibleQuestion = () => {
-    if (!survey) return false;
-    return currentQuestionIndex === survey.questions.length - 1;
-  };
-
-  // Update handleNextQuestion to check if we're on the last question
-  const handleNextQuestion = () => {
-    const currentQuestion = survey?.questions[currentQuestionIndex];
-    if (!currentQuestion) return;
-
-    // If we're on the last question, don't do anything
-    if (currentQuestionIndex === survey.questions.length - 1) {
-      return;
-    }
-
-    // If there's an answer for the current question, check skip logic
-    if (answers[currentQuestionIndex]) {
-      if (currentQuestion.skipLogic) {
-        const skipLogic = currentQuestion.skipLogic.find(
-          logic => logic.answer === answers[currentQuestionIndex]
-        );
-        if (skipLogic) {
-          setCurrentQuestionIndex(skipLogic.skipToIndex);
-          return;
-        }
-      }
-    }
-
-    // If no skip logic or no matching skip logic, move to next question
-    setCurrentQuestionIndex(prev => prev + 1);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 p-8 flex items-center justify-center">
@@ -188,9 +170,10 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     notFound();
   }
 
-  const currentQuestion = survey.questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
-  const progress = ((currentQuestionIndex + 1) / survey.questions.length) * 100;
+  // Check if all required questions are answered (excluding skipped ones)
+  const isComplete = survey.questions.every((_, index) => 
+    skippedQuestions.has(index) || answers[index]
+  );
 
   return (
     <div>
@@ -207,26 +190,24 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
 
             <div className="space-y-6">
               {survey.questions.map((question, index) => {
-                const isActive = index === currentQuestionIndex;
-                const isAnswered = answers[index] !== undefined;
-                const opacity = isActive ? 'opacity-100' : 'opacity-50';
-                const borderColor = isActive ? 'border-blue-500' : 'border-gray-600';
-                const bgColor = isActive ? 'bg-gray-700' : 'bg-gray-800';
-
+                const isSkipped = skippedQuestions.has(index);
                 return (
                   <div 
                     key={index}
-                    className={`rounded-lg border-2 ${borderColor} ${bgColor} p-6 shadow-lg transition-all duration-200 ${opacity}`}
+                    className={`rounded-lg border-2 border-gray-600 p-6 shadow-lg transition-all duration-200
+                      ${isSkipped ? 'opacity-50 bg-gray-800 pointer-events-none' : 'bg-gray-700'}`}
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                        isActive ? 'bg-blue-500' : 'bg-gray-600'
-                      } text-white font-semibold`}>
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full text-white font-semibold
+                        ${isSkipped ? 'bg-gray-500' : 'bg-blue-500'}`}>
                         {index + 1}
                       </div>
                       <h3 className="text-xl font-semibold text-white">
                         {question.name}
                       </h3>
+                      {isSkipped && (
+                        <span className="ml-auto text-gray-400 text-sm">Skipped</span>
+                      )}
                     </div>
 
                     {question.type === "multipleChoice" && (
@@ -238,22 +219,21 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
                               ${answers[index] === answer 
                                 ? 'border-blue-500 bg-blue-500/10' 
                                 : 'border-gray-600 hover:border-blue-500/50 hover:bg-gray-600'
-                              }
-                              ${!isActive ? 'cursor-not-allowed' : ''}`}
-                            onClick={() => isActive && handleAnswerChange(index, answer)}
+                              }`}
+                            onClick={() => !isSkipped && handleAnswerChange(index, answer)}
                           >
                             <input
                               type="radio"
                               id={`q${index}-a${ansIndex}`}
                               name={`question-${index}`}
                               className="h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-500"
-                              onChange={() => isActive && handleAnswerChange(index, answer)}
                               checked={answers[index] === answer}
-                              disabled={!isActive}
+                              onChange={() => !isSkipped && handleAnswerChange(index, answer)}
+                              disabled={isSkipped}
                             />
-                            <label
+                            <label 
                               htmlFor={`q${index}-a${ansIndex}`}
-                              className={`ml-4 text-lg text-gray-200 flex-1 ${!isActive ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                              className="ml-3 text-lg text-white cursor-pointer flex-grow"
                             >
                               {answer}
                             </label>
@@ -265,13 +245,11 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
                     {question.type === "textEntry" && (
                       <textarea
                         value={answers[index] || ""}
-                        onChange={(e) => isActive && handleAnswerChange(index, e.target.value)}
-                        className={`w-full p-3 bg-gray-800 border-2 border-blue-500 rounded-lg text-white text-lg
-                          focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200
-                          placeholder-gray-500 ${!isActive ? 'cursor-not-allowed opacity-50' : ''}`}
-                        placeholder="Type your answer here..."
+                        onChange={(e) => !isSkipped && handleAnswerChange(index, e.target.value)}
+                        placeholder="Enter your answer..."
+                        className="w-full p-3 rounded-lg bg-gray-600 text-white border-2 border-gray-500 focus:border-blue-500 focus:outline-none"
                         rows={3}
-                        disabled={!isActive}
+                        disabled={isSkipped}
                       />
                     )}
                   </div>
@@ -279,62 +257,20 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
               })}
             </div>
 
-            <div className="mt-8 flex gap-4">
-              {currentQuestionIndex > 0 && (
-                <button
-                  onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
-                  className="flex-1 p-4 bg-gray-600 text-white text-lg font-semibold rounded-lg 
-                    hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Previous
-                </button>
-              )}
-              
-              {!isLastVisibleQuestion() ? (
-                <button
-                  onClick={handleNextQuestion}
-                  className="flex-1 p-4 bg-blue-500 text-white text-lg font-semibold rounded-lg 
-                    hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center gap-2"
-                >
-                  Next
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ) : (
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="flex-1 p-4 bg-green-500 text-white text-lg font-semibold rounded-lg 
-                    hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed 
-                    transition-colors duration-200 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      Submit Survey
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </>
-                  )}
-                </button>
-              )}
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !isComplete}
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
+                  disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 text-lg font-semibold"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Survey"}
+              </button>
             </div>
 
             {error && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500 rounded-lg">
-                <p className="text-red-400 text-center">{error}</p>
+              <div className="mt-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-400">
+                {error}
               </div>
             )}
           </div>
