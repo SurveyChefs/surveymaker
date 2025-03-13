@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Question } from "../types";
 
 type Props = {
@@ -12,6 +12,13 @@ type Props = {
 const TextEntry: React.FC<Props> = ({ onAddQuestion, onCancel, editingQuestion }) => {
   const [questionName, setQuestionName] = useState(editingQuestion?.name || "");
 
+  useEffect(() => {
+    // Update form when editingQuestion changes
+    if (editingQuestion) {
+      setQuestionName(editingQuestion.name);
+    }
+  }, [editingQuestion]);
+
   const handleConfirm = () => {
     if (questionName.trim()) {
       onAddQuestion({ 
@@ -21,9 +28,8 @@ const TextEntry: React.FC<Props> = ({ onAddQuestion, onCancel, editingQuestion }
         index: editingQuestion?.index ?? 0
       });
       
-      if (!editingQuestion) {
-        clearForm();
-      }
+      // Clear the form after adding or updating a question
+      clearForm();
     }
   };
 
