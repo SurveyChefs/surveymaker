@@ -157,7 +157,7 @@ const SurveyBuilder = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-900 p-8">
         <div className="w-full max-w-2xl bg-gray-800 text-white p-8 rounded-lg shadow-xl">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4 text-blue-400">Reactive Survey Builder</h1>
+            <h1 className="text-4xl font-bold text-blue-400 mb-4">Reactive Survey Builder</h1>
             <p className="text-xl text-gray-300">Create interactive surveys with skip logic and dynamic responses</p>
           </div>
 

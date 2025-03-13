@@ -9,10 +9,10 @@ export default function Home() {
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-extrabold text-white mb-4">
+          <h1 className="text-5xl font-extrabold text-blue-400 mb-4">
             Survey Management System
           </h1>
-          <p className="text-xl text-gray-400">
+          <p className="text-xl text-gray-300">
             Create, manage, and analyze surveys with ease
           </p>
         </div>
