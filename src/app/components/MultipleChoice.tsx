@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Question, SkipLogic } from "../types";
 
 type Props = {
@@ -13,6 +13,13 @@ type Props = {
 const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionIndex, totalQuestions, editingQuestion }) => {
   const [questionName, setQuestionName] = useState(editingQuestion?.name || "");
   const [answers, setAnswers] = useState<string[]>(editingQuestion?.answers || [""]);
+
+  useEffect(() => {
+    if (editingQuestion) {
+      setQuestionName(editingQuestion.name);
+      setAnswers(editingQuestion.answers || [""]);
+    }
+  }, [editingQuestion]);
 
   const addAnswerField = () => {
     setAnswers(prev => [...prev, ""]);
@@ -42,10 +49,8 @@ const MultipleChoice: React.FC<Props> = ({ onAddQuestion, onCancel, questionInde
         description: ""
       });
 
-      // Clear the form only if we're not editing an existing question
-      if (!editingQuestion) {
-        clearForm();
-      }
+      // Clear the form after adding or updating a question
+      clearForm();
     }
   };
 

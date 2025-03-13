@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
-import HomeButton from "@/app/components/HomeButton";
+
 import Navbar from "@/app/components/Navbar";
 import toast from "react-hot-toast";
 
@@ -76,19 +76,34 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     const currentQuestion = survey.questions[questionIndex];
     if (currentQuestion?.skipLogic) {
       const skipLogic = currentQuestion.skipLogic.find(logic => logic.answer === answer);
-      console.log('Found skip logic:', skipLogic, 'for answer:', answer);
       
       if (skipLogic) {
-        // Create a new set of skipped questions
-        const newSkipped = new Set<number>();
-        // Add all questions between current and skip-to index to skipped set
-        for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
-          newSkipped.add(i);
-        }
-        console.log('Setting skipped questions:', Array.from(newSkipped));
-        setSkippedQuestions(newSkipped);
+        // Create a new set of skipped questions while preserving existing skips from previous questions
+        setSkippedQuestions(prev => {
+          const newSkipped = new Set(prev);
+          // Add all questions between current and skip-to index to skipped set
+          for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
+            newSkipped.add(i);
+          }
+          // Remove any skips that were set by the current question's previous answer
+          for (let i = skipLogic.skipToIndex; i < survey.questions.length; i++) {
+            if (prev.has(i)) {
+              const isSkippedByPreviousQuestion = Array.from(prev).some(skipIndex => 
+                skipIndex < questionIndex && 
+                survey.questions[skipIndex].skipLogic?.some(logic => 
+                  logic.answer === answers[skipIndex] && 
+                  logic.skipToIndex > i
+                )
+              );
+              if (!isSkippedByPreviousQuestion) {
+                newSkipped.delete(i);
+              }
+            }
+          }
+          return newSkipped;
+        });
 
-        // Also clear answers for skipped questions
+        // Clear answers for newly skipped questions
         setAnswers(prev => {
           const newAnswers = [...prev];
           for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
@@ -97,13 +112,25 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
           return newAnswers;
         });
       } else {
-        // If no skip logic for this answer, clear skipped questions after this question
-        setSkippedQuestions(new Set());
-        console.log('Clearing skip logic for answer:', answer);
+        // If no skip logic for this answer, only remove skips created by this question
+        setSkippedQuestions(prev => {
+          const newSkipped = new Set(prev);
+          // Remove skips only if they weren't set by previous questions
+          for (let i = questionIndex + 1; i < survey.questions.length; i++) {
+            const isSkippedByPreviousQuestion = Array.from(prev).some(skipIndex => 
+              skipIndex < questionIndex && 
+              survey.questions[skipIndex].skipLogic?.some(logic => 
+                logic.answer === answers[skipIndex] && 
+                logic.skipToIndex > i
+              )
+            );
+            if (!isSkippedByPreviousQuestion) {
+              newSkipped.delete(i);
+            }
+          }
+          return newSkipped;
+        });
       }
-    } else {
-      // If question has no skip logic, clear any existing skips
-      setSkippedQuestions(new Set());
     }
   };
 
@@ -186,7 +213,6 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
               <p className="text-xl text-gray-300">{survey.description}</p>
             </div>
 
-            <HomeButton />
 
             <div className="space-y-6">
               {survey.questions.map((question, index) => {
