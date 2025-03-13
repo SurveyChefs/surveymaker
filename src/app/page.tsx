@@ -45,7 +45,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="pages/surveys"
+            href="/surveys"
             className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-600 to-green-700 p-8 transition-transform hover:scale-105"
           >
             <div className="relative z-10">

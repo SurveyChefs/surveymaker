@@ -18,6 +18,7 @@ export interface ISurvey extends Document {
   title: string;
   description: string;
   questions: IQuestion[];
+  owner: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,9 +38,10 @@ const QuestionSchema = new Schema({
 });
 
 const SurveySchema = new Schema({
-  title: { type: String},
-  description: { type: String},
+  title: { type: String, required: true },
+  description: { type: String, required: true },
   questions: [QuestionSchema],
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

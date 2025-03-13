@@ -22,11 +22,8 @@ interface Survey {
   createdAt: string;
 }
 
-export default function SurveyPage({ params }: { params: Promise<{ id: string }> }) {
+export default function SurveyPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const resolvedParams = use(params);
-  const { id } = resolvedParams;
-
   const [answers, setAnswers] = useState<string[]>([]);
   const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,12 +35,15 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+        if (!/^[0-9a-fA-F]{24}$/.test(params.id)) {
           notFound();
         }
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/survey?id=${id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/survey?id=${params.id}`,
+          {
+            credentials: "include"
+          }
         );
         
         if (!res.ok) {
@@ -60,50 +60,35 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
     };
 
     fetchSurvey();
-  }, [id]);
+  }, [params.id]);
 
-  // Handle answer changes
   const handleAnswerChange = (questionIndex: number, answer: string) => {
-    if (!survey) return;
-    
     setAnswers(prev => {
       const newAnswers = [...prev];
       newAnswers[questionIndex] = answer;
       return newAnswers;
     });
 
-    // Update skipped questions based on skip logic
-    const currentQuestion = survey.questions[questionIndex];
-    if (currentQuestion?.skipLogic) {
-      const skipLogic = currentQuestion.skipLogic.find(logic => logic.answer === answer);
-      console.log('Found skip logic:', skipLogic, 'for answer:', answer);
-      
-      if (skipLogic) {
-        // Create a new set of skipped questions
-        const newSkipped = new Set<number>();
-        // Add all questions between current and skip-to index to skipped set
-        for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
+    // Check for skip logic
+    if (survey?.questions[questionIndex].skipLogic) {
+      const skipLogic = survey.questions[questionIndex].skipLogic;
+      const matchingLogic = skipLogic?.find(logic => logic.answer === answer);
+
+      if (matchingLogic) {
+        // Skip all questions between current question and skip target
+        const newSkipped = new Set(skippedQuestions);
+        for (let i = questionIndex + 1; i < matchingLogic.skipToIndex; i++) {
           newSkipped.add(i);
         }
-        console.log('Setting skipped questions:', Array.from(newSkipped));
         setSkippedQuestions(newSkipped);
-
-        // Also clear answers for skipped questions
-        setAnswers(prev => {
-          const newAnswers = [...prev];
-          for (let i = questionIndex + 1; i < skipLogic.skipToIndex; i++) {
-            newAnswers[i] = '';
-          }
-          return newAnswers;
-        });
       } else {
-        // If no skip logic for this answer, clear skipped questions after this question
-        setSkippedQuestions(new Set());
-        console.log('Clearing skip logic for answer:', answer);
+        // Remove skipped questions after this one if no skip logic matches
+        const newSkipped = new Set(skippedQuestions);
+        for (let i = questionIndex + 1; i < survey.questions.length; i++) {
+          newSkipped.delete(i);
+        }
+        setSkippedQuestions(newSkipped);
       }
-    } else {
-      // If question has no skip logic, clear any existing skips
-      setSkippedQuestions(new Set());
     }
   };
 
@@ -124,8 +109,9 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          surveyId: id,
+          surveyId: params.id,
           answers: validAnswers,
         }),
       });
@@ -278,4 +264,4 @@ export default function SurveyPage({ params }: { params: Promise<{ id: string }>
       </div>
     </div>
   );
-}
+} 
