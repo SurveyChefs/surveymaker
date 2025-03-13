@@ -1,10 +1,17 @@
-export type QuestionType = "multipleChoice" | "textEntry" | "matrixTable" | "slider";
+export type QuestionType = "multipleChoice" | "textEntry";
+
+export interface SkipLogic {
+  answer: string;
+  skipToIndex: number;
+}
 
 export interface Question {
   type: QuestionType;
   name: string;
-  description : string;
-  answers?: string[]; 
+  description: string;
+  answers?: string[];
+  skipLogic?: SkipLogic[];
+  index: number;
 }
 
 export interface Survey {
