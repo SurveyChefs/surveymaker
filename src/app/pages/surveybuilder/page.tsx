@@ -176,15 +176,18 @@ const SurveyBuilder = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block mb-2 text-lg" htmlFor="description">Survey Description</label>
-            <textarea
-              placeholder="Enter survey description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-              rows={4}
-            />
-          </div>
+  <label className="block mb-2 text-lg" htmlFor="description">
+    Survey Description
+  </label>
+  <textarea
+    id="description"
+    placeholder="Enter survey description"
+    value={description}
+    onChange={(e) => setDescription(e.target.value)}
+    className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+    rows={4}
+  />
+</div>
 
           <div className="mb-6">
             <button
@@ -339,7 +342,7 @@ const SurveyBuilder = () => {
       {/* Survey Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gray-900 p-8 rounded-lg w-full max-w-2xl">
+          <div className="bg-gray-900 p-8 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="rounded-lg border border-gray-600 bg-gray-800 p-6 shadow-md">
               <h1 className="mb-4 text-3xl font-bold text-white">{title}</h1>
               <p className="mb-8 text-lg text-gray-300">{description}</p>
